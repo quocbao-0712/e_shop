@@ -28,9 +28,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (c) => CartItemCounter()),
         ChangeNotifierProvider(create: (c) => ItemQuantity()),
-        ChangeNotifierProvider(create: (c) => AddressChanger()),
         ChangeNotifierProvider(create: (c) => TotalAmount()),
-
+        ChangeNotifierProvider(create: (c) => AddressChanger()),
       ],
       child: MaterialApp(
             title: 'e-Shop',

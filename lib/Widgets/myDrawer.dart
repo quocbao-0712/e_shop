@@ -5,10 +5,13 @@ import 'package:e_shop/Store/Search.dart';
 import 'package:e_shop/Store/cart.dart';
 import 'package:e_shop/Orders/myOrders.dart';
 import 'package:e_shop/Store/storehome.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class MyDrawer extends StatelessWidget {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -16,15 +19,6 @@ class MyDrawer extends StatelessWidget {
            children: [
              Container(
                padding: EdgeInsets.only(top: 25.0,bottom: 10.0),
-               decoration: new BoxDecoration(
-                 gradient: new LinearGradient(
-                   colors: [Colors.pink, Colors.lightGreenAccent],
-                   begin: const FractionalOffset(0.0, 0.0),
-                   end: const FractionalOffset(1.0, 0.0),
-                   stops: [0.0, 1.0],
-                   tileMode: TileMode.clamp,
-                 ),
-               ),
                child: Column(
                  children: [
                    Material(
@@ -43,7 +37,7 @@ class MyDrawer extends StatelessWidget {
                    SizedBox(height: 10.0,),
                    Text(
                      EcommerceApp.sharedPreferences.getString(EcommerceApp.userName),
-                     style: TextStyle(color: Colors.white,fontSize: 35.0,fontFamily: "Signatra"),
+                     style: TextStyle(color: Colors.black54,fontSize: 20.0),
                    ),
                  ],
                ),
@@ -51,75 +45,54 @@ class MyDrawer extends StatelessWidget {
              SizedBox(height:12.0,),
              Container(
                padding: EdgeInsets.only(top: 1.0),
-               decoration: new BoxDecoration(
-                 gradient: new LinearGradient(
-                   colors: [Colors.pink, Colors.lightGreenAccent],
-                   begin: const FractionalOffset(0.0, 0.0),
-                   end: const FractionalOffset(1.0, 0.0),
-                   stops: [0.0, 1.0],
-                   tileMode: TileMode.clamp,
-                 ),
-               ),
                child: Column(
                  children: [
 
                    ListTile(
-                     leading: Icon(Icons.home, color: Colors.white,),
-                     title: Text("Home", style: TextStyle(color: Colors.white),),
+                     leading: Icon(Icons.home, color: Colors.black54,),
+                     title: Text("Home", style: TextStyle(color: Colors.black54,fontWeight: FontWeight.w600),),
                      onTap: (){
                        Route route = MaterialPageRoute(builder: (c) => StoreHome());
                        Navigator.pushReplacement(context, route);
                      },
                    ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-                   ListTile(
-                     leading: Icon(Icons.reorder, color: Colors.white,),
-                     title: Text("My Order", style: TextStyle(color: Colors.white),),
-                     onTap: (){
-                       Route route = MaterialPageRoute(builder: (c) => MyOrders());
-                       Navigator.pushReplacement(context, route);
+                   // Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
+                   // ListTile(
+                   //   leading: Icon(Icons.shopping_cart, color: Colors.white,),
+                   //   title: Text("MyCart", style: TextStyle(color: Colors.white),),
+                   //   onTap: (){
+                   //     Route route = MaterialPageRoute(builder: (c) => CartPage());
+                   //     Navigator.pushReplacement(context, route);
+                   //   },
+                   // ),
+                   // Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
+                   // ListTile(
+                   //   leading: Icon(Icons.search, color: Colors.white,),
+                   //   title: Text("Search", style: TextStyle(color: Colors.white),),
+                   //   onTap: (){
+                   //     Route route = MaterialPageRoute(builder: (c) => SearchProduct());
+                   //     Navigator.pushReplacement(context, route);
+                   //   },
+                   // ),
+                   // Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
+                   // ListTile(
+                   //   leading: Icon(Icons.exit_to_app, color: Colors.white,),
+                   //   title: Text("Logout", style: TextStyle(color: Colors.white),),
+                   //   onTap: (){
+                   //       EcommerceApp.auth.signOut().then((c){
+                   //       Route route = MaterialPageRoute(builder: (c) => AuthenticScreen());
+                   //       Navigator.pushReplacement(context, route);
+                   //     });
+                   //   },
+                   // ),
+                   Divider(height: 10.0,color: Colors.transparent,thickness: 6.0,),
+                   ElevatedButton(child: Text("Logout"),
+                     onPressed: () async{
+                     await googleSignIn.signOut();
+                     Route route = MaterialPageRoute(builder: (c) => AuthenticScreen());
+                     Navigator.pushReplacement(context, route);
                      },
                    ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-                   ListTile(
-                     leading: Icon(Icons.shopping_cart, color: Colors.white,),
-                     title: Text("MyCart", style: TextStyle(color: Colors.white),),
-                     onTap: (){
-                       Route route = MaterialPageRoute(builder: (c) => CartPage());
-                       Navigator.pushReplacement(context, route);
-                     },
-                   ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-                   ListTile(
-                     leading: Icon(Icons.search, color: Colors.white,),
-                     title: Text("Search", style: TextStyle(color: Colors.white),),
-                     onTap: (){
-                       Route route = MaterialPageRoute(builder: (c) => SearchProduct());
-                       Navigator.pushReplacement(context, route);
-                     },
-                   ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-                   ListTile(
-                     leading: Icon(Icons.add_location, color: Colors.white,),
-                     title: Text("Add new Address", style: TextStyle(color: Colors.white),),
-                     onTap: (){
-                       Route route = MaterialPageRoute(builder: (c) => AddAddress());
-                       Navigator.pushReplacement(context, route);
-                     },
-                   ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-                   ListTile(
-                     leading: Icon(Icons.exit_to_app, color: Colors.white,),
-                     title: Text("Logout", style: TextStyle(color: Colors.white),),
-                     onTap: (){
-                       EcommerceApp.auth.signOut().then((c){
-                         Route route = MaterialPageRoute(builder: (c) => AuthenticScreen());
-                         Navigator.pushReplacement(context, route);
-                       });
-                     },
-                   ),
-                   Divider(height: 10.0,color: Colors.white,thickness: 6.0,),
-
                  ],
                ),
              ),
@@ -128,3 +101,4 @@ class MyDrawer extends StatelessWidget {
     );
   }
 }
+

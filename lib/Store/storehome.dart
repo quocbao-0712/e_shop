@@ -16,6 +16,8 @@ import '../Widgets/searchBox.dart';
 double width;
 
 class StoreHome extends StatefulWidget {
+  final String currentUserId;
+  StoreHome ({Key key, @required this.currentUserId}) :super(key: key);
   @override
   _StoreHomeState createState() => _StoreHomeState();
 }
@@ -63,7 +65,7 @@ class _StoreHomeState extends State<StoreHome> {
                       Icon(
                         Icons.brightness_1,
                         size: 20.0,
-                        color: Colors.green,
+                        color: Colors.transparent,
                       ),
                       Positioned(
                         top: 3.0,
@@ -74,7 +76,7 @@ class _StoreHomeState extends State<StoreHome> {
                             return Text(
                               counter.count.toString(),
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.transparent,
                                   fontSize: 12.0,
                                   fontWeight: FontWeight.bold),
                             );

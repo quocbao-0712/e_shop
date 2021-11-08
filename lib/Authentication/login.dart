@@ -6,9 +6,12 @@ import 'package:e_shop/Authentication/forgot_pass.dart';
 import 'package:e_shop/Widgets/customTextField.dart';
 import 'package:e_shop/DialogBox/errorDialog.dart';
 import 'package:e_shop/DialogBox/loadingDialog.dart';
+import 'package:e_shop/Widgets/loadingWidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Store/storehome.dart';
 import 'package:e_shop/Config/config.dart';
 
@@ -27,6 +30,33 @@ class _LoginState extends State<Login>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailTextEditingController = TextEditingController();
   final TextEditingController _passwordTextEditingController = TextEditingController();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  SharedPreferences preferences;
+  bool inLoggedIn = false;
+  bool isLoading = false;
+  FirebaseUser currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    isSignedIn();
+  }
+
+  void isSignedIn() async{
+    this.setState(() {
+      inLoggedIn = true;
+    });
+    preferences = await SharedPreferences.getInstance();
+    inLoggedIn = await googleSignIn.isSignedIn();
+    if(inLoggedIn){
+      Navigator.push(context, MaterialPageRoute(builder: (context) => StoreHome(currentUserId: preferences.getString("id"))));
+    }
+    //currentUserId: preferences.getString("id")
+    this.setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +114,25 @@ class _LoginState extends State<Login>
               color: Colors.blue,
               child: Text(
                 "Login", style: TextStyle(color: Colors.white),
+              ),
+            ),
+            GestureDetector(
+              onTap: controlSignIn,
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: 150.0,
+                      height: 37.0,
+                      decoration: BoxDecoration(
+                       image: DecorationImage(
+                         image: AssetImage('images/google.png'),
+                         fit: BoxFit.cover,
+                       ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             // ElevatedButton(
@@ -161,5 +210,55 @@ class _LoginState extends State<Login>
 
      });
   }
+  Future<Null> controlSignIn() async{
+    preferences = await SharedPreferences.getInstance();
+  this.setState(() {
+    isLoading = true;
+  });
+  GoogleSignInAccount googleUser = await googleSignIn.signIn();
+  GoogleSignInAuthentication googleSignInAuthentication = await googleUser.authentication;
+  final AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+  FirebaseUser firebaseUser = (await firebaseAuth.signInWithCredential(credential)).user;
+  //Success
+  if(firebaseUser != null){
+    //check if ready Signup
+    final QuerySnapshot resultQuery = await Firestore.instance.collection("users").where("uid", isEqualTo: firebaseUser.uid).getDocuments();
+    final List<DocumentSnapshot> documentSnapshort = resultQuery.documents;
+    //Save Data to FireStore - if new user
+    if(documentSnapshort.length == 0){
+      Firestore.instance.collection("users").document(firebaseUser.uid).setData({
+        "name" : firebaseUser.displayName,
+        "url" : firebaseUser.photoUrl,
+        "uid" : firebaseUser.uid,
+        EcommerceApp.userCartList:["garbageValue"],
+      });
+      currentUser = firebaseUser;
+      await preferences.setString("uid", currentUser.uid);
+      await preferences.setString("name", currentUser.displayName);
+      await preferences.setString("url", currentUser.photoUrl);
+      await EcommerceApp.sharedPreferences.setStringList(EcommerceApp.userCartList, ["garbageValue"]);
 
+    }else{
+      //Write data to local
+      currentUser = firebaseUser;
+      await preferences.setString("uid", documentSnapshort[0]["uid"]);
+      await preferences.setString("name", documentSnapshort[0]["name"]);
+      await preferences.setString("url", documentSnapshort[0]["url"]);
+      await EcommerceApp.sharedPreferences.setStringList(EcommerceApp.userCartList, documentSnapshort[0]["garbageValue"]);
+    }
+
+    Fluttertoast.showToast(msg: "Congratulations, Sign in Successful.");
+    this.setState(() {
+      isLoading = false;
+    });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => StoreHome(currentUserId: firebaseUser.uid)));
+  }
+  //Note Success
+  else{
+    Fluttertoast.showToast(msg: "Try Again, Sign in Failed.");
+    this.setState(() {
+      isLoading = false;
+    });
+  }
+  }
 }
